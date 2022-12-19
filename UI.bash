@@ -40,17 +40,21 @@ UI() {
 }
 
 networkInfo() {
-	echo -e "\nShowing network info"
-					echo -e "IP Address: \c"
-					hostname -i
-					echo -e "MAC Address: \c"
-					ip addr | awk '/ether/ {print $2}'
-					echo -e "Gateway: \c"
-					ip r | grep default | cut -d " " -f3
-					echo -e "Status: \c"
-					ip link show | grep enp | cut -d " " -f9
-					echo -e "\nPress any button to continue"
-					read -n 1
+	echo -e "\nComputer: \c"
+	hostname
+	echo -e "Network Interfaces:"
+	ip link show | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1'
+	echo -e "Showing network info"
+	echo -e "IP Address: \c"
+	hostname -i
+	echo -e "MAC Address: \c"
+	ip addr | awk '/ether/ {print $2}'
+	echo -e "Gateway: \c"
+	ip r | grep default | cut -d " " -f3
+	echo -e "Status: \c"
+	ip link show | grep enp | cut -d " " -f9
+	echo -e "\nPress any button to continue"
+	read -n 1
 }
 
 
