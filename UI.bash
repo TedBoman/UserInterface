@@ -43,7 +43,7 @@ networkInfo() {
 	echo -e "\nComputer: \c"
 	hostname
 	echo -e "Network Interfaces:"
-	ip link show | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1'
+	ip link | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1' | tail -n +2
 	echo -e "Showing network info"
 	echo -e "IP Address: \c"
 	hostname -i
