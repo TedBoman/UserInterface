@@ -28,7 +28,7 @@ UI() {
 				3)
 					groupManager;;
 				4)
-					echo "test4";;
+					folderFunction;;
 				5)
 					EXITVAR=0
 					echo "Thank you come again!";;
@@ -438,11 +438,38 @@ folderFunction(){
 
 		case $USERCHOICE in
 			1)
-
+				folderName=""
+				read -p "Enter desired folder name (Add path if you wish to create the folder somewhere else): " folderName
+				mkdir $folderName
+				if [ $? -eq 0 ]; then
+					clear
+					echo -e "\nFolder $folderName was created!\nPress any button to continue"
+					read -n 1
+				else	
+					clear
+					echo -e "\nA folder with the name $folderName already exists!\nNo new folder was created!"
+					echo -e "\nPress any button to continue"
+					read -n 1
+				fi
 				
 				;;
 			2)
-				
+				desiredDirectory=""
+				read -e -p "Enter desired directory to list its files and folders (leave empty for current working directory): " desiredDirectory
+				if [ "$desiredDirectory" = "" ]; then
+					desiredDirectory=$(pwd)
+				fi
+				if [ -d "$desiredDirectory" ]; then
+					clear
+					ls -1 $desiredDirectory
+					echo -e "\nPress any button to continue"
+					read -n 1
+				else	
+					clear
+					echo -e "\nDesired folder doesnt exist!"
+					echo -e "\nPress any button to continue"
+					read -n 1
+				fi
 				;;
 			3)
 				while [ "$EXITVAR" -eq "1" ]; do
@@ -452,7 +479,7 @@ folderFunction(){
 					echo "************************************"
 					echo -e "\n1. "
 					echo "2. "
-					echo "3. "
+					echo "3. Change permissions"
 					echo "4. "
 					echo "5. "
 					read -n 1 -p "Enter your option here: " USERCHOICE
@@ -460,34 +487,169 @@ folderFunction(){
 
 					case $USERCHOICE in
 						1)
-
-							
+							echo "Invalid input"
 							;;
 						2)
-							
+							echo "Invalid input"
 							;;
 						3)
-							
+							while [ "$EXITVAR" -eq "1" ]; do
+								clear
+								echo "************************************"
+								echo "Change permissions"
+								echo "************************************"
+								echo -e "\n1. Owner permissions "
+								echo "2. Group permissions "
+								echo "3. User permissions "
+								echo "4. Back "
+								read -n 1 -p "Enter your option here: " USERCHOICE
+								clear
+
+								case $USERCHOICE in
+									1)
+										accessChange=""
+										permissionLevel=""
+										folderName=""
+										read -e -p $'\nEnter the folder name of the folder you wish to modify the permissions on: ' folderName
+										if [ -d "$folderName" ]; then
+											read -n 1 -p $'\ndo you wish to add (+),remove (-) or set (=) permissions?: ' accessChange
+											case $accessChange in
+												("" | *[!+-=]*)
+													echo -e "\n\nInvalid input!" 
+													echo -e "\nPress any button to continue"
+													read -n 1							
+													;;
+												(*)
+													read -n 3 -p $'\n\nEnter the permissions you wish to change (example: rwx): ' permissionLevel
+													case $permissionLevel in
+														("" | *[!rwx]*)
+															echo -e "\nInvalid input!"
+															echo -e "\nPress any button to continue"
+															read -n 1 
+															;;
+														(*)
+															chmod u$accessChange$permissionLevel $folderName
+															echo -e "\nPermissions changed"
+															echo -e "\nPress any button to continue"
+															read -n 1 
+															;;
+													esac											
+													;;
+											esac					
+			
+										else
+											clear
+											echo -e "\nDesired folder doesnt exist!"
+											echo -e "\nPress any button to continue"
+											read -n 1
+										fi						
+										;;
+									2)
+										accessChange=""
+										permissionLevel=""
+										folderName=""
+										read -e -p $'\nEnter the folder name of the folder you wish to modify the permissions on: ' folderName
+										if [ -d "$folderName" ]; then
+											read -n 1 -p $'\ndo you wish to add (+),remove (-) or set (=) permissions?: ' accessChange
+											case $accessChange in
+												("" | *[!+-=]*)
+													echo -e "\n\nInvalid input!" 
+													echo -e "\nPress any button to continue"
+													read -n 1							
+													;;
+												(*)
+													read -n 3 -p $'\n\nEnter the permissions you wish to change (example: rwx): ' permissionLevel
+													case $permissionLevel in
+														("" | *[!rwx]*)
+															echo -e "\nInvalid input!"
+															echo -e "\nPress any button to continue"
+															read -n 1 
+															;;
+														(*)
+															chmod g$accessChange$permissionLevel $folderName
+															echo -e "\nPermissions changed"
+															echo -e "\nPress any button to continue"
+															read -n 1 
+															;;
+													esac											
+													;;
+											esac					
+			
+										else
+											clear
+											echo -e "\nDesired folder doesnt exist!"
+											echo -e "\nPress any button to continue"
+											read -n 1
+										fi
+										;;
+									3)
+										accessChange=""
+										permissionLevel=""
+										folderName=""
+										read -e -p $'\nEnter the folder name of the folder you wish to modify the permissions on: ' folderName
+										if [ -d "$folderName" ]; then
+											read -n 1 -p $'\ndo you wish to add (+),remove (-) or set (=) permissions?: ' accessChange
+											case $accessChange in
+												("" | *[!+-=]*)
+													echo -e "\n\nInvalid input!" 
+													echo -e "\nPress any button to continue"
+													read -n 1							
+													;;
+												(*)
+													read -n 3 -p $'\n\nEnter the permissions you wish to change (example: rwx): ' permissionLevel
+													case $permissionLevel in
+														("" | *[!rwx]*)
+															echo -e "\nInvalid input!"
+															echo -e "\nPress any button to continue"
+															read -n 1 
+															;;
+														(*)
+															chmod o$accessChange$permissionLevel $folderName
+															echo -e "\nPermissions changed"
+															echo -e "\nPress any button to continue"
+															read -n 1 
+															;;
+													esac											
+													;;
+											esac					
+			
+										else
+											clear
+											echo -e "\nDesired folder doesnt exist!"
+											echo -e "\nPress any button to continue"
+											read -n 1
+										fi
+										;;
+									4)
+										return
+										;;
+									*)
+										echo "Invalid input"
+										;;
+								esac
+							done
 							;;
 						4)
-							
+							echo "Invalid input"
 							;;
 						5)
 							return
 							;;
 						*)
-							echo "Invalid input";;
+							echo "Invalid input"
+							;;
 					esac
 				done
 				;;
 			4)
-				
+				echo "Invalid input"
 				;;
 			5)
 				return
 				;;
 			*)
-				echo "Invalid input";;
+				echo "Invalid input"
+				;;
 		esac
 	done
 }
