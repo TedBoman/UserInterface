@@ -74,7 +74,7 @@ userMenu() {
 				2)
 					USERNAME=""
 					echo "************************************"
-					echo "Follow these steps to delete a user"
+					echo -e "\033[1mFollow these steps to delete a user\033[0m"
 					echo "************************************"
 					read -p "Enter the user: " USERNAME
 					id $USERNAME &> /dev/null
@@ -130,12 +130,12 @@ userMenu() {
 						echo "Change user attributes"
 						echo "************************************"
 						echo -e "\n\033[1m1. Change username\033[0m"
-						echo "\033[1m2. Change userID\033[0m"
-						echo "\033[1m3. Change home directory\033[0m"
-						echo "\033[1m4. Change shell path\033[0m"
-						echo "\033[1m5. Change user comment\033[0m"
-						echo "\033[1m6. Change user password\033[0m"
-						echo "\033[1m7. Return\033[0m"
+						echo -e "\033[1m2. Change userID\033[0m"
+						echo -e "\033[1m3. Change home directory\033[0m"
+						echo -e "\033[1m4. Change shell path\033[0m"
+						echo -e "\033[1m5. Change user comment\033[0m"
+						echo -e "\033[1m6. Change user password\033[0m"
+						echo -e "\033[1m7. Return\033[0m"
 						read -n 1 -p "\033[1mEnter your option here: \033[0m" USERCHOICE
 						clear
 
@@ -144,7 +144,7 @@ userMenu() {
 						
 								USERNAME=""
 								echo "************************************"					
-								echo "\033[1mChange username\033[0m"
+								echo -e "\033[1mChange username\033[0m"
 								echo "************************************"								
 								read -p "Enter old username: " USERNAME
 								id $USERNAME &> /dev/null
@@ -160,7 +160,7 @@ userMenu() {
 								NEWID=0
 								USERNAME=""
 								echo "************************************"					
-								echo "\033[1mChange userID\033[0m"
+								echo -e "\033[1mChange userID\033[0m"
 								echo "************************************"								
 
 								read -p "Enter user: " USERNAME
@@ -177,7 +177,7 @@ userMenu() {
 								USERNAME=""
 								NEWHOME=""
 								echo "************************************"					
-								echo "\033[1mChange home directory\033[0m"
+								echo -e "\033[1mChange home directory\033[0m"
 								echo "************************************"	
 								read -p "Enter user: " USERNAME
 								id $USERNAME &> /dev/null
@@ -192,7 +192,7 @@ userMenu() {
 								USERNAME=""
 								NEWSHELL=""
 								echo "************************************"					
-								echo "\033[1mChange shell path\033[0m"
+								echo -e "\033[1mChange shell path\033[0m"
 								echo "************************************"								
 
 								read -p "Enter username: " USERNAME
@@ -208,7 +208,7 @@ userMenu() {
 								USERNAME=""
 								NEWCOMMENT=""
 								echo "************************************"					
-								echo "\033[1mChange user comment\033[0m"
+								echo -e "\033[1mChange user comment\033[0m"
 								echo "************************************"								
 
 								read -p "Enter username: " USERNAME
@@ -260,15 +260,15 @@ groupManager() {
 	managerVal=1
 	while [ "$managerVal" -eq "1" ]; do
 		clear
-		echo -e "\nGroup Manager Menu!"
+		echo -e "\033[1m\nGroup Manager Menu!\033[0m"
 		echo "***************"
-		echo "1. Create group"
-		echo "2. List User Groups"
-		echo "3. List Users In Chosen Group"
-		echo "4. Add User To Group"
-		echo "5. Remove User From Group"
-		echo "6. Remove A User Created Group"
-		echo "7. Back To Main Menu"
+		echo -e "\033[1m1. Create group\033[0m"
+		echo -e "\033[1m2. List User Groups\033[0m"
+		echo -e "\033[1m3. List Users In Chosen Group\033[0m"
+		echo -e "\033[1m4. Add User To Group\033[0m"
+		echo -e "\033[1m5. Remove User From Group\033[0m"
+		echo -e "\033[1m6. Remove A User Created Group\033[0m"
+		echo -e "\033[1m7. Back To Main Menu\033[0m"
 		read -n 1 -p "Enter your option here: " -s USERCHOICE
 		clear
 
@@ -422,13 +422,13 @@ folderFunction(){
 	while [ "$EXITVAR" -eq "1" ]; do
 		clear
 		echo "************************************"
-		echo "\033[1mDirectoryMenu\033[0m"
+		echo -e "\033[1mDirectoryMenu\033[0m"
 		echo "************************************"
-		echo -e "\n1. Create directory"
-		echo "2. List contents of directory"
-		echo "3. List and change attributes for a directory"
-		echo "4. Delete a Directory"
-		echo "5. Return"
+		echo -e "\033[1m\n1. Create directory\033[0m"
+		echo -e "\033[1m2. List contents of directory\033[0m"
+		echo -e "\033[1m3. List and change attributes for a directory\033[0m"
+		echo -e "\033[1m4. Delete a Directory\033[0m"
+		echo -e "\033[1m5. Back to the main menu\033[0m"
 		read -n 1 -p "Enter your option here: " USERCHOICE
 		clear
 
@@ -471,15 +471,15 @@ folderFunction(){
 				while [ "$EXITVAR" -eq "1" ]; do
 					clear
 					echo "************************************"
-					echo "\033[1mChange directory/folder attributes\033[0m"
+					echo -e "\033[1mChange directory/folder attributes\033[0m"
 					echo "************************************"
-					echo -e "\n1. Change owner for desired drectory or folder"
-					echo "2. Change group for desired directory or folder"
-					echo "3. "
-					echo "4. Apply sticky bit to a directory/folder"
-					echo "5. Apply setgid on a directory/folder"
-					echo "6. Show the last edited directory/folder"
-					echo "7. Return"
+					echo -e "\033[1m\n1. Change owner for desired drectory or folder\033[0m"
+					echo -e "\033[1m2. Change group for desired directory or folder\033[0m"
+					echo -e "\033[1m3. Change permissions\033[0m"
+					echo -e "\033[1m4. Apply sticky bit to a directory/folder\033[0m"
+					echo -e "\033[1m5. Apply setgid on a directory/folder\033[0m"
+					echo -e "\033[1m6. Show the last edited directory/folder\033[0m"
+					echo -e "\033[1m7. Back to the main menu\033[0m"
 					read -n 1 -p "Enter your option here: " USERCHOICE
 					clear
 
@@ -488,7 +488,7 @@ folderFunction(){
 							folderName=""
 							newOwner=""
 							echo "************************************"
-							echo "\033[1mChange folder/directory owner\033[0m"
+							echo -e "\033[1mChange folder/directory owner\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and folder name to change its owner: " folderName
 							if [ -d "$folderName" ]; then
@@ -512,7 +512,7 @@ folderFunction(){
 							folderName=""
 							newGroup=""
 							echo "************************************"
-							echo "\033[1mChange folder/directory group owner\033[0m"
+							echo -e "\033[1mChange folder/directory group owner\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and folder name to change its group owner: " folderName
 							if [ -d "$folderName" ]; then
@@ -537,12 +537,12 @@ folderFunction(){
 							while [ "$EXITVAR" -eq "1" ]; do
 								clear
 								echo "************************************"
-								echo "Change permissions"
+								echo -e "\033[1mChange permissions\033[0m"
 								echo "************************************"
-								echo -e "\n1. Owner permissions "
-								echo "2. Group permissions "
-								echo "3. User permissions "
-								echo "4. Back "
+								echo -e "\033[1m\n1. Owner permissions \033[0m"
+								echo -e "\033[1m2. Group permissions \033[0m"
+								echo -e "\033[1m3. User permissions \033[0m"
+								echo -e "\033[1m4. Back \033[0m"
 								read -n 1 -p "Enter your option here: " USERCHOICE
 								clear
 
@@ -674,7 +674,7 @@ folderFunction(){
 						4)
 							folderName=""
 							echo "************************************"
-							echo "\033[1mApply sticky bit to a directory/folder\033[0m"
+							echo -e "\033[1mApply sticky bit to a directory/folder\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and directory/filename to apply sticky bit" folderName
 							if [ -d "$folderName" ]; then
@@ -694,7 +694,7 @@ folderFunction(){
 						5)
 							folderName=""
 							echo "************************************"
-							echo "\033[1mApply setgid to a directory/folder\033[0m"
+							echo -e "\033[1mApply setgid to a directory/folder\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and directory/filename to apply setgid" folderName
 							if [ -d "$folderName" ]; then
@@ -749,7 +749,7 @@ folderFunction(){
 				folderName=""
 				confirmed=""
 				echo "************************************"
-				echo "\033[1mDelete a directory or folder\033[0m"
+				echo -e "\033[1mDelete a directory or folder\033[0m"
 				echo "************************************"
 				echo "Use this format /path/foldername"
 				read -e -p "Enter the path and name of the folder or directory you wish to delete: " folderName
@@ -757,7 +757,7 @@ folderFunction(){
 						read -e -p "The folder/directory and everything in it will be deleted! Press y to continue or n to return: " confirmed
 						clear
 						echo "************************************"
-						echo "\033[1mDelete a directory or folder\033[0m"
+						echo -e "\033[1mDelete a directory or folder\033[0m"
 						echo "************************************"
 						if [ $confirmed = "y" ]; then
 							rm -r $folderName &> /dev/null
