@@ -424,11 +424,11 @@ folderFunction(){
 		echo "************************************"
 		echo "\033[1mDirectoryMenu\033[0m"
 		echo "************************************"
-		echo -e "\n1. Create directory"
-		echo "2. List contents of directory"
-		echo "3. List and change attributes for a directory"
-		echo "4. Delete a Directory"
-		echo "5. Return"
+		echo -e "\033[1m\n1. Create directory\033[0m"
+		echo "\033[1m2. List contents of directory\033[0m"
+		echo "\033[1m3. List and change attributes for a directory\033[0m"
+		echo "\033[1m4. Delete a Directory\033[0m"
+		echo "\033[1m5. Return\033[m"
 		read -n 1 -p "Enter your option here: " USERCHOICE
 		clear
 
