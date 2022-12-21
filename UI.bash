@@ -422,6 +422,48 @@ networkInfo() {
 	read -n 1
 }
 
+mappFunction(){			
+	while [ "$EXITVAR" -eq "1" ]; do
+		clear
+		echo "************************************"
+		echo "Change user attributes"
+		echo "************************************"
+		echo -e "\n1. Change username"
+		echo "2. Change userID"
+		echo "3. Change home directory"
+		echo "4. Change shell path"
+		echo "5. Change user comment"
+		echo "6. Change user password"
+		echo "7. Return"
+		read -n 1 -p "Enter your option here: " USERCHOICE
+		clear
 
+		case $USERCHOICE in
+			1)
+
+				
+				;;
+			2)
+				
+				;;
+			3)
+				
+				;;
+			4)
+				
+				;;
+			5)
+				
+				;;
+			6)
+				
+				;;
+			7)
+				ATTRIBUTES_FLAG=0
+				return
+				;;
+			*)
+				echo "Invalid input";;
+}
 
 UI
