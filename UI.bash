@@ -75,15 +75,17 @@ userMenu() {
 		case $USERCHOICE in
 				1)
 					USERNAME=""
+					GECOS=""
 					echo "************************************"
 					echo -e "\033[1mFollow these steps to create a user\033[0m"
 					echo "************************************"
 					read -e -p "Enter username (MAX 32): " USERNAME
+					read -e -p "Enter your full name: " GECOS
 					id $USERNAME &> /dev/null
 					if [ $? = 0 ]; then
 						echo "This user already exists!"
 					else
-						adduser --force-badname $USERNAME
+						adduser --gecos "$GECOS" --force-badname $USERNAME
 						echo "The user $USERNAME has been added!"
 					fi
 					echo -e "\nPress any button to continue"
