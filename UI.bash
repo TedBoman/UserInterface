@@ -39,6 +39,24 @@ UI() {
 	fi
 }
 
+networkInfo() {
+	echo -e "\n\033[1mComputer: \033[0m\c"
+	hostname
+	echo -e "\033[1mNetwork Interfaces: \033[0m"
+	ip link show | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1' | sed '1d'
+	echo -e "\033[1mShowing network info \033[0m"
+	echo -e "\033[1mIP Address: \033[0m\c"
+	hostname -i
+	echo -e "\033[1mMAC Address: \033[0m\c"
+	ip addr | awk '/ether/ {print $2}'
+	echo -e "\033[1mGateway: \033[0m\c"
+	ip r | grep default | cut -d " " -f3
+	echo -e "\033[1mStatus: \033[0m\c"
+	ip link show | grep enp | cut -d " " -f9
+	echo -e "\nPress any button to continue"
+	read -e -n 1
+}
+
 userMenu() {
 	USERMENUCHOICE=1
 	while [ "$USERMENUCHOICE" -eq "1" ]; do
@@ -65,7 +83,7 @@ userMenu() {
 					if [ $? = 0 ]; then
 						echo "This user already exists!"
 					else
-						adduser $USERNAME
+						adduser --force-badname $USERNAME
 						echo "The user $USERNAME has been added!"
 					fi
 					echo -e "\nPress any button to continue"
@@ -136,7 +154,7 @@ userMenu() {
 						echo -e "\033[1m5. Change user comment\033[0m"
 						echo -e "\033[1m6. Change user password\033[0m"
 						echo -e "\033[1m7. Return\033[0m"
-						read -n 1 -p "\033[1mEnter your option here: \033[0m" USERCHOICE
+						read -e -n 1 -p "\033[1mEnter your option here: \033[0m" USERCHOICE
 						clear
 
 						case $USERCHOICE in
@@ -398,24 +416,6 @@ groupManager() {
 				echo "Invalid input";;
 		esac
 	done
-}
-
-networkInfo() {
-	echo -e "\nComputer: \c"
-	hostname
-	echo -e "Network Interfaces:"
-	ip link show | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1' | sed '1d'
-	echo -e "Showing network info"
-	echo -e "IP Address: \c"
-	hostname -i
-	echo -e "MAC Address: \c"
-	ip addr | awk '/ether/ {print $2}'
-	echo -e "Gateway: \c"
-	ip r | grep default | cut -d " " -f3
-	echo -e "Status: \c"
-	ip link show | grep enp | cut -d " " -f9
-	echo -e "\nPress any button to continue"
-	read -e -n 1
 }
 
 folderFunction(){			
@@ -727,7 +727,10 @@ folderFunction(){
 							read -e -n 1
 							;;
 						6)
-
+							echo "************************************"
+							echo -e "\033[1mLast edited folder on the system\033[0m"
+							echo "************************************"
+							echo -e "\n"
 							# Find the last modified directory on the entire filesystem
 							last_modified_dir=$(find / -type d -printf '%T+ %p\n' 2>/dev/null | sort -r | head -n 1)
 
@@ -767,7 +770,7 @@ folderFunction(){
 				echo -e "\033[1mDelete a directory or folder\033[0m"
 				echo "************************************"
 				echo "Use this format /path/foldername"
-				read -e -p "Enter the path and name of the folder or directory you wish to delete: " folderName
+				read -e -p "Enter the path and name of the folder or directory you wish to delete (Enter just the folder name for current directory): " folderName
 				if [ -d "$folderName" ]; then
 						read -e -p "The folder/directory and everything in it will be deleted! Press y to continue or n to return: " confirmed
 						clear
