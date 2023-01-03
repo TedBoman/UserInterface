@@ -1,3 +1,9 @@
+#Linux Case Assignment
+#Ted Boman
+#Theo Gould
+#Grupp 35
+
+
 #!/bin/bash
 EXITVAR=1
 USERCHOICE=0
@@ -542,12 +548,11 @@ folderFunction(){
 					echo -e "\033[1mCreate directory\033[0m"
 					echo "************************************"
 				read -e -p "Enter desired folder name (Add path if you wish to create the folder somewhere else): " folderName
-				if [ -n "$USERNAME" ]; then
+				if [ -n "$folderName" ]; then
 					mkdir $folderName
 					if [ $? -eq 0 ]; then
 						clear
-						echo -e "\nFolder $folderName was created!\nPress any button to continue"
-						read -e -n 1
+						echo -e "\nFolder $folderName was created!"
 					else	
 						clear
 						echo -e "\nA folder with the name $folderName already exists!\nNo new folder was created!"
@@ -557,7 +562,6 @@ folderFunction(){
 				fi
 				echo -e "\nPress any button to continue"
 				read -e -n 1
-	
 				;;
 			2)
 				desiredDirectory=""
