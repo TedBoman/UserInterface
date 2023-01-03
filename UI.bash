@@ -457,30 +457,42 @@ groupManager() {
 				echo -e "\033[1mRemove User From Group\033[0m"
 				echo "************************************"
 				read -e -p "Enter the name of the user you wish to remove from a group : " userName
-				grep $userName /etc/passwd
-				if [ $? -eq 0 ]; then
-					clear
-					read -e -p "Enter which group you want the member removed from: " groupName
-					getent group $groupName
+				if [ -n "$userName" ]; then
+					grep $userName /etc/passwd
 					if [ $? -eq 0 ]; then
-						gpasswd --delete $userName $groupName
 						clear
-						echo -e "\n"$userName" has now been removed from "$groupName""
-						echo -e "\nPress any button to continue"
-						read -e -n 1
+						read -e -p "Enter which group you want the member removed from: " groupName
+						if [ -n "$groupName" ]; then
+							getent group $groupName
+							if [ $? -eq 0 ]; then
+								gpasswd --delete $userName $groupName
+								clear
+								echo -e "\n"$userName" has now been removed from "$groupName""
+								echo -e "\nPress any button to continue"
+								read -e -n 1
+							else
+								clear
+								echo -e "\nChosen group does not exist!"
+								echo -e "\nPress any button to continue"
+								read -e -n 1
+							fi
+						else
+							clear			
+							echo -e "\nNo group input detected"
+							echo -e "\nPress any button to continue"
+							read -e -n 1
+						fi
 					else
 						clear
-						echo -e "\nChosen group does not exist!"
+						echo -e "\nChosen user does not exist!"
 						echo -e "\nPress any button to continue"
 						read -e -n 1
 					fi
 				else
-					clear
-						echo -e "\nChosen user does not exist!"
-						echo -e "\nPress any button to continue"
-						read -e -n 1
+					echo -e "\nNo user input detected!"
+					echo -e "\nPress any button to continue"
+					read -e -n 1
 				fi
-
 				;;
 			6)
 				groupName=""
