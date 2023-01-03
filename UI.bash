@@ -356,10 +356,16 @@ groupManager() {
 				groupadd $groupName
 				if [ $? -eq 0 ]; then
 					clear
+					echo "************************************"
+					echo -e "\033[1mCreate a group\033[0m"
+					echo "************************************"
 					echo -e "\nGroup "$groupName" created!\nPress any button to continue"
 					read -e -n 1
 				else	
 					clear
+					echo "************************************"
+					echo -e "\033[1mCreate a group\033[0m"
+					echo "************************************"
 					echo -e "\nGroup "$groupName" already exists! No new group was created!"
 					echo -e "\nPress any button to continue"
 					read -e -n 1
@@ -429,11 +435,15 @@ groupManager() {
 				grep $userName /etc/passwd
 				if [ $? -eq 0 ]; then
 					clear
+					echo "************************************"
+					echo -e "\033[1mAdd User To Group\033[0m"
+					echo "************************************"
 					read -e -p "Enter which group you want the member to join: " groupName
 					getent group $groupName
 					if [ $? -eq 0 ]; then
 						usermod -a -G $groupName $userName
 						clear
+	
 						echo -e "\n"$userName" has now been added to "$groupName""
 						echo -e "\nPress any button to continue"
 						read -e -n 1
@@ -530,18 +540,22 @@ folderFunction(){
 					echo -e "\033[1mCreate directory\033[0m"
 					echo "************************************"
 				read -e -p "Enter desired folder name (Add path if you wish to create the folder somewhere else): " folderName
-				mkdir $folderName
-				if [ $? -eq 0 ]; then
-					clear
-					echo -e "\nFolder $folderName was created!\nPress any button to continue"
-					read -e -n 1
-				else	
-					clear
-					echo -e "\nA folder with the name $folderName already exists!\nNo new folder was created!"
-					echo -e "\nPress any button to continue"
-					read -e -n 1
+				if [ -n "$USERNAME" ]; then
+					mkdir $folderName
+					if [ $? -eq 0 ]; then
+						clear
+						echo -e "\nFolder $folderName was created!\nPress any button to continue"
+						read -e -n 1
+					else	
+						clear
+						echo -e "\nA folder with the name $folderName already exists!\nNo new folder was created!"
+					fi
+				else
+					echo "Please enter the name of the new directory"
 				fi
-				
+				echo -e "\nPress any button to continue"
+				read -e -n 1
+	
 				;;
 			2)
 				desiredDirectory=""
