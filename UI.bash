@@ -10,14 +10,15 @@ UI() {
 	else
 		while [ "$EXITVAR" -eq "1" ]; do
 			clear
-			echo -e "\033[1m\nSuperUser Menu!\033[0m"
-			echo "***************"
+			echo "************************************"
+			echo -e "\033[1mSuperUser Menu!\033[0m"
+			echo "************************************"
 			echo -e "\033[1m1. Network info\033[0m"
 			echo -e "\033[1m2. Users\033[0m"
 			echo -e "\033[1m3. Groups\033[0m"
 			echo -e "\033[1m4. Directories\033[0m"
 			echo -e "\033[1m5. Exit\033[0m"
-			read -n 1 -p "Enter your option here: " -s USERCHOICE
+			read -e -n 1 -p "Enter your option here: " -s USERCHOICE
 			clear
 
 			case $USERCHOICE in
@@ -39,11 +40,35 @@ UI() {
 	fi
 }
 
+
+networkInfo() {
+	echo "************************************"
+	echo -e "\033[1mNetwork information\033[0m"
+	echo "************************************"
+	echo -e "\n\033[1mComputer: \c\033[0m"
+	hostname
+	echo -e "\033[1mNetwork Interfaces: \n\c\033[0m"
+	ip link show | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1' | sed '1d'
+	echo -e "\033[1mShowing network info: \033[0m"
+	echo -e "\033[1mIP Address: \c\033[0m"
+	hostname -i
+	echo -e "\033[1mMAC Address: \c\033[0m"
+	ip addr | awk '/ether/ {print $2}'
+	echo -e "\033[1mGateway: \c\033[0m"
+	ip r | grep default | cut -d " " -f3
+	echo -e "\033[1mStatus: \c\033[0m"
+	ip link show | grep enp | cut -d " " -f9
+	echo -e "\nPress any button to continue"
+	read -e -n 1
+}
+
+
 userMenu() {
 	USERMENUCHOICE=1
 	while [ "$USERMENUCHOICE" -eq "1" ]; do
 		clear
-		echo -e "\033[1m\nUserMenu\033[0m"
+		echo "************************************"
+		echo -e "\033[1mUserMenu\033[0m"
 		echo "************************************"
 		echo -e "\033[1m1. Add user\033[0m"
 		echo -e "\033[1m2. Delete user\033[0m"
@@ -51,41 +76,43 @@ userMenu() {
 		echo -e "\033[1m4. View all attributes for a user\033[0m"
 		echo -e "\033[1m5. Change user attributes\033[0m"
 		echo -e "\033[1m6. Return\033[0m"
-		read -n 1 -p "Enter your option here: " -s USERCHOICE
+		read -e -n 1 -p "Enter your option here: " -s USERCHOICE
 		clear
 
 		case $USERCHOICE in
 				1)
 					USERNAME=""
+					GECOS=""
 					echo "************************************"
 					echo -e "\033[1mFollow these steps to create a user\033[0m"
 					echo "************************************"
-					read -p "Enter username (MAX 32): " USERNAME
+					read -e -p "Enter username (MAX 32): " USERNAME
+					read -e -p "Enter your full name: " GECOS
 					id $USERNAME &> /dev/null
 					if [ $? = 0 ]; then
 						echo "This user already exists!"
 					else
-						adduser $USERNAME
+						adduser --gecos "$GECOS" --force-badname $USERNAME
 						echo "The user $USERNAME has been added!"
 					fi
 					echo -e "\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 					;;
 				2)
 					USERNAME=""
 					echo "************************************"
-					echo "Follow these steps to delete a user"
+					echo -e "\033[1mFollow these steps to delete a user\033[0m"
 					echo "************************************"
-					read -p "Enter the user: " USERNAME
+					read -e -p "Enter the user: " USERNAME
 					id $USERNAME &> /dev/null
 					if [ $? = 1 ]; then
 						echo "This user does not exist!"
 					else					
-						userdel $USERNAME
+						userdel --remove $USERNAME &> /dev/null
 						echo "This user $USERNAME has been deleted!"
 					fi
 					echo -e "\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 					;;
 				3)
 					echo "**************************************"
@@ -93,14 +120,14 @@ userMenu() {
 					echo "**************************************"
 					grep [0-9] /etc/passwd | grep -v -e nologin | awk -F: '{print $3, $1}' | column -t -N "USERID,USERNAME" | awk 'NR == 1; NR > 1 {print $0 | "sort -n"}'
 					echo -e "\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 					;;
 				4)
 					USERNAME=""
 					echo "************************************"					
 					echo -e "\033[1mShow attributes fo a specific user\033[0m"
 					echo "************************************"
-					read -p "Enter username to view attributes: " USERNAME
+					read -e -p "Enter username to view attributes: " USERNAME
 					id $USERNAME &> /dev/null
 					if [ $? = 1 ]; then
 						echo "This user does not exist!"
@@ -117,9 +144,11 @@ userMenu() {
 						getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $6}'
 						echo -e "Shell\t\t\c"
 						getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $7}'
-					fi	
+						echo -e "Groups for user \c"
+						groups $USERNAME
+					fi
 					echo -e "\nPress any button to continue"
-					read -n 1	
+					read -e -n 1	
 					;;
 				5)
 					ATTRIBUTES_FLAG=1
@@ -127,124 +156,132 @@ userMenu() {
 					while [ "$ATTRIBUTES_FLAG" -eq "1" ]; do
 						clear
 						echo "************************************"
-						echo "Change user attributes"
+						echo -e "\033[1mChange user attributes\033[0m"
 						echo "************************************"
 						echo -e "\n\033[1m1. Change username\033[0m"
-						echo "\033[1m2. Change userID\033[0m"
-						echo "\033[1m3. Change home directory\033[0m"
-						echo "\033[1m4. Change shell path\033[0m"
-						echo "\033[1m5. Change user comment\033[0m"
-						echo "\033[1m6. Change user password\033[0m"
-						echo "\033[1m7. Return\033[0m"
-						read -n 1 -p "\033[1mEnter your option here: \033[0m" USERCHOICE
+						echo -e "\033[1m2. Change userID\033[0m"
+						echo -e "\033[1m3. Change home directory\033[0m"
+						echo -e "\033[1m4. Change shell path\033[0m"
+						echo -e "\033[1m5. Change user comment\033[0m"
+						echo -e "\033[1m6. Change user password\033[0m"
+						echo -e "\033[1m7. Return\033[0m"
+						read -e -n 1 -p "Enter your option here: " USERCHOICE
 						clear
 
 						case $USERCHOICE in
 							1)
-						
 								USERNAME=""
 								echo "************************************"					
-								echo "\033[1mChange username\033[0m"
+								echo -e "\033[1mChange username\033[0m"
 								echo "************************************"								
-								read -p "Enter old username: " USERNAME
+								read -e -p "Enter old username: " USERNAME
 								id $USERNAME &> /dev/null
 								if [ $? = 1 ]; then
 									echo "This user does not exist!"									
 								else
 									NEWUSERNAME=""
-									read -p "Enter new username: " NEWUSERNAME
+									read -e -p "Enter new username: " NEWUSERNAME
 									usermod -l $NEWUSERNAME $USERNAME
 								fi
+								echo -e "\nPress any button to continue"
+								read -e -n 1
 								;;
 							2)
 								NEWID=0
 								USERNAME=""
 								echo "************************************"					
-								echo "\033[1mChange userID\033[0m"
+								echo -e "\033[1mChange userID\033[0m"
 								echo "************************************"								
 
-								read -p "Enter user: " USERNAME
+								read -e -p "Enter user: " USERNAME
 								id $USERNAME &> /dev/null
 								if [ $? = 1 ]; then
 									echo "This user does not exist!"
 								else	
 									NEWUSERNAME=""
-									read -p "Enter new userID (MUST BE UNIQUE): " NEWID
+									read -e -p "Enter new userID (MUST BE UNIQUE): " NEWID
 									usermod -u $NEWID $USERNAME
 								fi
+								echo -e "\nPress any button to continue"
+								read -e -n 1
 								;;
 							3)
 								USERNAME=""
 								NEWHOME=""
 								echo "************************************"					
-								echo "\033[1mChange home directory\033[0m"
+								echo -e "\033[1mChange home directory\033[0m"
 								echo "************************************"	
-								read -p "Enter user: " USERNAME
+								read -e -p "Enter user: " USERNAME
 								id $USERNAME &> /dev/null
 								if [ $? = 1 ]; then
 									echo "This user does not exist!"
 								else
-									read -p "Enter the new home directory: " NEWHOME
+									read -e -p "Enter the new home directory: " NEWHOME
 									usermod -d $NEWHOME $USERNAME
 								fi
+								echo -e "\nPress any button to continue"
+								read -e -n 1
 								;;
 							4)
 								USERNAME=""
 								NEWSHELL=""
 								echo "************************************"					
-								echo "\033[1mChange shell path\033[0m"
+								echo -e "\033[1mChange shell path\033[0m"
 								echo "************************************"								
 
-								read -p "Enter username: " USERNAME
+								read -e -p "Enter username: " USERNAME
 								id $USERNAME &> /dev/null
 								if [ $? = 1 ]; then
 									echo "This user does not exist!"
 								else
-									read -p "Enter new shell path: " NEWSHELL
+									read -e -p "Enter new shell path: " NEWSHELL
 									usermod -s $NEWSHELL $USERNAME
 								fi
+								echo -e "\nPress any button to continue"
+								read -e -n 1
 								;;
 							5)
 								USERNAME=""
 								NEWCOMMENT=""
 								echo "************************************"					
-								echo "\033[1mChange user comment\033[0m"
+								echo -e "\033[1mChange user comment\033[0m"
 								echo "************************************"								
 
-								read -p "Enter username: " USERNAME
+								read -e -p "Enter username: " USERNAME
 								id $USERNAME &> /dev/null
 								if [ $? = 1 ]; then
 									echo "This user does not exist!"
 								else
-									read -p "Enter new comment: " NEWCOMMENT
+									read -e -p "Enter new comment: " NEWCOMMENT
 									usermod -c "$NEWCOMMENT" $USERNAME
 								fi
+								echo -e "\nPress any button to continue"
+								read -e -n 1
 								;;
 							6)
 								USERNAME=""
 								echo "************************************"					
 								echo "\033[1mChange user password\033[0m"
 								echo "************************************"								
-								read -p "Enter username: " USERNAME
+								read -e -p "Enter username: " USERNAME
 								id $USERNAME &> /dev/null
 								if [ $? = 1 ]; then
 									echo "This user does not exist!"
 								else
 									NEWPASSWORD=""
-									read -p "Enter new password: " NEWPASSWORD
+									read -e -p "Enter new password: " NEWPASSWORD
 									usermod -p $NEWPASSWORD $USERNAME
 								fi
+								echo -e "\nPress any button to continue"
+								read -e -n 1
 								;;
 							7)
 								ATTRIBUTES_FLAG=0
-								return
 								;;
 							*)
 								echo "Invalid input";;
 							esac
-						echo -e "\nPress any button to continue"
-						read -n 1
-					done					
+						done					
 					;;
 				6)
 					return
@@ -260,136 +297,165 @@ groupManager() {
 	managerVal=1
 	while [ "$managerVal" -eq "1" ]; do
 		clear
-		echo -e "\nGroup Manager Menu!"
-		echo "***************"
-		echo "1. Create group"
-		echo "2. List User Groups"
-		echo "3. List Users In Chosen Group"
-		echo "4. Add User To Group"
-		echo "5. Remove User From Group"
-		echo "6. Remove A User Created Group"
-		echo "7. Back To Main Menu"
-		read -n 1 -p "Enter your option here: " -s USERCHOICE
+		echo "************************************"
+		echo -e "\033[1mGroup Manager Menu!\033[0m"
+		echo "************************************"
+		echo -e "\033[1m1. Create group\033[0m"
+		echo -e "\033[1m2. List User Groups\033[0m"
+		echo -e "\033[1m3. List Users In Chosen Group\033[0m"
+		echo -e "\033[1m4. Add User To Group\033[0m"
+		echo -e "\033[1m5. Remove User From Group\033[0m"
+		echo -e "\033[1m6. Remove A User Created Group\033[0m"
+		echo -e "\033[1m7. Back To Main Menu\033[0m"
+		read -e -n 1 -p "Enter your option here: " -s USERCHOICE
 		clear
 
 		case $USERCHOICE in
 			1)
 				groupName=""
-				read -p "Enter desired group name: " groupName
+				echo "************************************"
+				echo -e "\033[1mCreate a group\033[0m"
+				echo "************************************"
+				read -e -p "\nEnter desired group name: " groupName
 				groupadd $groupName
 				if [ $? -eq 0 ]; then
 					clear
 					echo -e "\nGroup "$groupName" created!\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 				else	
 					clear
 					echo -e "\nGroup "$groupName" already exists! No new group was created!"
 					echo -e "\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 				fi
 				;;
 			2)
+				echo "************************************"
+				echo -e "\033[1mList User Groups\033[0m"
+				echo "************************************"
 				getent group | egrep ":[0-9][0-9][0-9][0-9]:" | cut -d ':' -f1 
 				echo -e "\nPress any button to go back to main menu"
-				read -n 1
+				read -e -n 1
 				;;
 			3)
 				groupName=""
-				read -p "Enter which groups members you wish to display: " groupName
+				echo "************************************"
+				echo -e "\033[1mList Users In Chosen Group\033[0m"
+				echo "************************************"
+				groupName=""
+				read -e -p "Enter which groups members you wish to display: " groupName
 				getent group $groupName
 				if [ $? -eq 0 ]; then
+				    if [ -z $groupName ]; then
+					clear
+					echo -e "\nNo group name was entered!"
+					echo -e "\nPress any button to continue"
+					read -e -n 1
+				    else 
 					grep $groupName /etc/passwd
 					if [ $? -eq 0 ]; then
-						clear
-						echo -e "\nGroup members of "$groupName": "
-						echo -e -n ""$groupName""
-						getent group $groupName | cut -d ':' -f4
-						echo -e "\nPress any button to continue"
-						read -n 1
-					else	
-						clear
-						echo -e "\nGroup members of "$groupName": "
-						getent group $groupName | cut -d ':' -f4
-						echo -e "\nPress any button to continue"
-						read -n 1
+					    clear
+					    echo -e "\nGroup members of "$groupName": "
+					    echo -e -n ""$groupName""
+					    getent group $groupName | cut -d ':' -f4
+					    echo -e "\nPress any button to continue"
+					    read -e -n 1
+
+					else
+					    clear
+					    echo -e "\nGroup members of "$groupName": "
+					    getent group $groupName | cut -d ':' -f4
+					    echo -e "\nPress any button to continue"
+					    read -e -n 1
+
 					fi
-				else	
-					clear
-					echo -e "\nThere is no group with that name"
-					echo -e "\nPress any button to continue"
-					read -n 1
+				    fi
+				else
+				    clear
+				    echo -e "\nThere is no group with that name"
+				    echo -e "\nPress any button to continue"
+				    read -e -n 1
 				fi
 				;;
 			4)
 				groupName=""
 				userName=""
-				read -p "Enter the name of the user you wish to add to a group : " userName
+				echo "************************************"
+				echo -e "\033[1mAdd User To Group\033[0m"
+				echo "************************************"
+				read -e -p "Enter the name of the user you wish to add to a group : " userName
 				grep $userName /etc/passwd
 				if [ $? -eq 0 ]; then
 					clear
-					read -p "Enter which group you want the member to join: " groupName
+					read -e -p "Enter which group you want the member to join: " groupName
 					getent group $groupName
 					if [ $? -eq 0 ]; then
 						usermod -a -G $groupName $userName
 						clear
 						echo -e "\n"$userName" has now been added to "$groupName""
 						echo -e "\nPress any button to continue"
-						read -n 1
+						read -e -n 1
 					else
 						clear
 						echo -e "\nChosen group does not exist!"
 						echo -e "\nPress any button to continue"
-						read -n 1
+						read -e -n 1
 					fi
 				else
 					clear
 						echo -e "\nChosen user does not exist!"
 						echo -e "\nPress any button to continue"
-						read -n 1
+						read -e -n 1
 				fi
 				;;
 			5)
 				groupName=""
 				userName=""
-				read -p "Enter the name of the user you wish to remove from a group : " userName
+				echo "************************************"
+				echo -e "\033[1mRemove User From Group\033[0m"
+				echo "************************************"
+				read -e -p "Enter the name of the user you wish to remove from a group : " userName
 				grep $userName /etc/passwd
 				if [ $? -eq 0 ]; then
 					clear
-					read -p "Enter which group you want the member removed from: " groupName
+					read -e -p "Enter which group you want the member removed from: " groupName
 					getent group $groupName
 					if [ $? -eq 0 ]; then
 						gpasswd --delete $userName $groupName
 						clear
 						echo -e "\n"$userName" has now been removed from "$groupName""
 						echo -e "\nPress any button to continue"
-						read -n 1
+						read -e -n 1
 					else
 						clear
 						echo -e "\nChosen group does not exist!"
 						echo -e "\nPress any button to continue"
-						read -n 1
+						read -e -n 1
 					fi
 				else
 					clear
 						echo -e "\nChosen user does not exist!"
 						echo -e "\nPress any button to continue"
-						read -n 1
+						read -e -n 1
 				fi
 
 				;;
 			6)
 				groupName=""
-				read -p "Enter the name of the group you wish to delete: " groupName
+				echo "************************************"
+				echo -e "\033[1mDelete A Group\033[0m"
+				echo "************************************"
+				read -e -p "Enter the name of the group you wish to delete: " groupName
 				groupdel $groupName
 				if [ $? -eq 0 ]; then
 					clear
 					echo -e "\nGroup "$groupName" deleted!\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 				else	
 					clear
 					echo -e "\nGroup "$groupName" doesnt exist! No group was deleted!"
 					echo -e "\nPress any button to continue"
-					read -n 1
+					read -e -n 1
 				fi
 				;;
 			7)
@@ -400,60 +466,77 @@ groupManager() {
 	done
 }
 
-networkInfo() {
-	echo -e "\nComputer: \c"
-	hostname
-	echo -e "Network Interfaces:"
-	ip link show | awk -F: '{print $2}' | sed 's/00$//' | grep -e [0-9] -e [a-z] -e [A-Z] | awk '{$1=$1}1'
-	echo -e "Showing network info"
-	echo -e "IP Address: \c"
-	hostname -i
-	echo -e "MAC Address: \c"
-	ip addr | awk '/ether/ {print $2}'
-	echo -e "Gateway: \c"
-	ip r | grep default | cut -d " " -f3
-	echo -e "Status: \c"
-	ip link show | grep enp | cut -d " " -f9
-	echo -e "\nPress any button to continue"
-	read -n 1
-}
-
-folderFunction(){			
-	while [ "$EXITVAR" -eq "1" ]; do
+folderFunction(){
+	FolderVar=1			
+	while [ "$FolderVar" -eq "1" ]; do
 		clear
 		echo "************************************"
-		echo "\033[1mDirectoryMenu\033[0m"
+		echo -e "\033[1mDirectoryMenu\033[0m"
 		echo "************************************"
-		echo -e "\n1. Create directory"
-		echo "2. List contents of directory"
-		echo "3. List and change attributes for a directory"
-		echo "4. Delete a Directory"
-		echo "5. Return"
-		read -n 1 -p "Enter your option here: " USERCHOICE
+		echo -e "\033[1m\n1. Create directory\033[0m"
+		echo -e "\033[1m2. List contents of directory\033[0m"
+		echo -e "\033[1m3. List and change attributes for a directory\033[0m"
+		echo -e "\033[1m4. Delete a Directory\033[0m"
+		echo -e "\033[1m5. Back to the main menu\033[0m"
+		read -e -n 1 -p "Enter your option here: " USERCHOICE
 		clear
 
 		case $USERCHOICE in
 			1)
-				
+				folderName=""
+					echo "************************************"
+					echo -e "\033[1mCreate directory\033[0m"
+					echo "************************************"
+				read -e -p "Enter desired folder name (Add path if you wish to create the folder somewhere else): " folderName
+				mkdir $folderName
+				if [ $? -eq 0 ]; then
+					clear
+					echo -e "\nFolder $folderName was created!\nPress any button to continue"
+					read -e -n 1
+				else	
+					clear
+					echo -e "\nA folder with the name $folderName already exists!\nNo new folder was created!"
+					echo -e "\nPress any button to continue"
+					read -e -n 1
+				fi
 				
 				;;
 			2)
-				
+				desiredDirectory=""
+					echo "************************************"
+					echo -e "\033[1mList contents of directory\033[0m"
+					echo "************************************"
+				read -e -p "Enter desired directory to list its files and folders (leave empty for current working directory): " desiredDirectory
+				if [ "$desiredDirectory" = "" ]; then
+					desiredDirectory=$(pwd)
+				fi
+				if [ -d "$desiredDirectory" ]; then
+					clear
+					ls -1 $desiredDirectory
+					echo -e "\nPress any button to continue"
+					read -e -n 1
+				else	
+					clear
+					echo -e "\nDesired folder doesnt exist!"
+					echo -e "\nPress any button to continue"
+					read -e -n 1
+				fi
 				;;
 			3)
-				while [ "$EXITVAR" -eq "1" ]; do
+				DirVar=1
+				while [ "$DirVar" -eq "1" ]; do
 					clear
 					echo "************************************"
-					echo "\033[1mChange directory/folder attributes\033[0m"
+					echo -e "\033[1mChange directory/folder attributes\033[0m"
 					echo "************************************"
-					echo -e "\n1. Change owner for desired drectory or folder"
-					echo "2. Change group for desired directory or folder"
-					echo "3. "
-					echo "4. Apply sticky bit to a directory/folder"
-					echo "5. Apply setgid on a directory/folder"
-					echo "6. Show the last edited directory/folder"
-					echo "7. Return"
-					read -n 1 -p "Enter your option here: " USERCHOICE
+					echo -e "\033[1m\n1. Change owner for desired drectory or folder\033[0m"
+					echo -e "\033[1m2. Change group for desired directory or folder\033[0m"
+					echo -e "\033[1m3. Change permissions\033[0m"
+					echo -e "\033[1m4. Apply sticky bit to a directory/folder\033[0m"
+					echo -e "\033[1m5. Apply setgid on a directory/folder\033[0m"
+					echo -e "\033[1m6. Show the last edited directory/folder\033[0m"
+					echo -e "\033[1m7. Back to the main menu\033[0m"
+					read -e -n 1 -p "Enter your option here: " USERCHOICE
 					clear
 
 					case $USERCHOICE in
@@ -461,7 +544,7 @@ folderFunction(){
 							folderName=""
 							newOwner=""
 							echo "************************************"
-							echo "\033[1mChange folder/directory owner\033[0m"
+							echo -e "\033[1mChange folder/directory owner\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and folder name to change its owner: " folderName
 							if [ -d "$folderName" ]; then
@@ -479,13 +562,13 @@ folderFunction(){
 								echo "This folder/directory does not exist!"
 							fi
 							echo -e "\nPress any button to continue"
-							read -n 1							
+							read -e -n 1							
 							;;
 						2)
 							folderName=""
 							newGroup=""
 							echo "************************************"
-							echo "\033[1mChange folder/directory group owner\033[0m"
+							echo -e "\033[1mChange folder/directory group owner\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and folder name to change its group owner: " folderName
 							if [ -d "$folderName" ]; then
@@ -503,16 +586,161 @@ folderFunction(){
 								echo "This folder/directory does not exist!"
 							fi
 							echo -e "\nPress any button to continue"
-							read -n 1
+							read -e -n 1
 							
 							;;
 						3)
-							
+							PermVar=1
+							while [ "$EXITVAR" -eq "1" ]; do
+								clear
+								echo "************************************"
+								echo -e "\033[1mChange permissions\033[0m"
+								echo "************************************"
+								echo -e "\033[1m\n1. Owner permissions \033[0m"
+								echo -e "\033[1m2. Group permissions \033[0m"
+								echo -e "\033[1m3. User permissions \033[0m"
+								echo -e "\033[1m4. Back \033[0m"
+								read -n 1 -p "Enter your option here: " USERCHOICE
+								clear
+
+								case $USERCHOICE in
+									1)
+										accessChange=""
+										permissionLevel=""
+										folderName=""
+										echo "************************************"
+										echo -e "\033[1mModify owner permissions\033[0m"
+										echo "************************************"
+										read -e -p $'\nEnter the folder name of the folder you wish to modify the permissions on: ' folderName
+										if [ -d "$folderName" ]; then
+											read -e -n 1 -p $'\ndo you wish to add (+),remove (-) or set (=) permissions?: ' accessChange
+											case $accessChange in
+												("" | *[!+-=]*)
+													echo -e "\n\nInvalid input!" 
+													echo -e "\nPress any button to continue"
+													read -e -n 1							
+													;;
+												(*)
+													read -e -n 3 -p $'\n\nEnter the permissions you wish to change (example: rwx): ' permissionLevel
+													case $permissionLevel in
+														("" | *[!rwx]*)
+															echo -e "\nInvalid input!"
+															echo -e "\nPress any button to continue"
+															read -e -n 1 
+															;;
+														(*)
+															chmod u$accessChange$permissionLevel $folderName
+															echo -e "\nPermissions changed"
+															echo -e "\nPress any button to continue"
+															read -e -n 1 
+															;;
+													esac											
+													;;
+											esac					
+			
+										else
+											clear
+											echo -e "\nDesired folder doesnt exist!"
+											echo -e "\nPress any button to continue"
+											read -e -n 1
+										fi						
+										;;
+									2)
+										accessChange=""
+										permissionLevel=""
+										folderName=""
+										echo "************************************"
+										echo -e "\033[1mModify group permissiond\033[0m"
+										echo "************************************"
+										read -e -p $'\nEnter the folder name of the folder you wish to modify the permissions on: ' folderName
+										if [ -d "$folderName" ]; then
+											read -e -n 1 -p $'\ndo you wish to add (+),remove (-) or set (=) permissions?: ' accessChange
+											case $accessChange in
+												("" | *[!+-=]*)
+													echo -e "\n\nInvalid input!" 
+													echo -e "\nPress any button to continue"
+													read -e -n 1							
+													;;
+												(*)
+													read -e -n 3 -p $'\n\nEnter the permissions you wish to change (example: rwx): ' permissionLevel
+													case $permissionLevel in
+														("" | *[!rwx]*)
+															echo -e "\nInvalid input!"
+															echo -e "\nPress any button to continue"
+															read -e -n 1 
+															;;
+														(*)
+															chmod g$accessChange$permissionLevel $folderName
+															echo -e "\nPermissions changed"
+															echo -e "\nPress any button to continue"
+															read -e -n 1 
+															;;
+													esac											
+													;;
+											esac					
+			
+										else
+											clear
+											echo -e "\nDesired folder doesnt exist!"
+											echo -e "\nPress any button to continue"
+											read -e -n 1
+										fi
+										;;
+									3)
+										accessChange=""
+										permissionLevel=""
+										folderName=""
+										echo "************************************"
+										echo -e "\033[1mModify user permissions\033[0m"
+										echo "************************************"
+										read -e -p $'\nEnter the folder name of the folder you wish to modify the permissions on: ' folderName
+										if [ -d "$folderName" ]; then
+											read -e -n 1 -p $'\ndo you wish to add (+),remove (-) or set (=) permissions?: ' accessChange
+											case $accessChange in
+												("" | *[!+-=]*)
+													echo -e "\n\nInvalid input!" 
+													echo -e "\nPress any button to continue"
+													read -e -n 1							
+													;;
+												(*)
+													read -e -n 3 -p $'\n\nEnter the permissions you wish to change (example: rwx): ' permissionLevel
+													case $permissionLevel in
+														("" | *[!rwx]*)
+															echo -e "\nInvalid input!"
+															echo -e "\nPress any button to continue"
+															read -e -n 1 
+															;;
+														(*)
+															chmod o$accessChange$permissionLevel $folderName
+															echo -e "\nPermissions changed"
+															echo -e "\nPress any button to continue"
+															read -e -n 1 
+															;;
+													esac											
+													;;
+											esac					
+			
+										else
+											clear
+											echo -e "\nDesired folder doesnt exist!"
+											echo -e "\nPress any button to continue"
+											read -e -n 1
+										fi
+										;;
+									4)
+										PermVar=0
+										;;
+									*)
+										echo "Invalid input"
+										;;
+								esac
+							done
 							;;
+						
 						4)
 							folderName=""
 							echo "************************************"
-							echo "\033[1mApply sticky bit to a directory/folder\033[0m"
+							echo -e "\033[1mApply sticky bit to a directory/folder\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and directory/filename to apply sticky bit" folderName
 							if [ -d "$folderName" ]; then
@@ -527,12 +755,12 @@ folderFunction(){
 								echo "This folder/directory does not exist!"
 							fi
 							echo -e "\nPress any button to continue"
-							read -n 1
+							read -e -n 1
 							;;
 						5)
 							folderName=""
 							echo "************************************"
-							echo "\033[1mApply setgid to a directory/folder\033[0m"
+							echo -e "\033[1mApply setgid to a directory/folder\033[0m"
 							echo "************************************"
 							read -e -p "Enter the path and directory/filename to apply setgid" folderName
 							if [ -d "$folderName" ]; then
@@ -547,10 +775,13 @@ folderFunction(){
 								echo "This folder/directory does not exist!"
 							fi
 							echo -e "\nPress any button to continue"
-							read -n 1
+							read -e -n 1
 							;;
 						6)
-
+							echo "************************************"
+							echo -e "\033[1mLast edited folder on the system\033[0m"
+							echo "************************************"
+							echo -e "\n"
 							# Find the last modified directory on the entire filesystem
 							last_modified_dir=$(find / -type d -printf '%T+ %p\n' 2>/dev/null | sort -r | head -n 1)
 
@@ -571,13 +802,15 @@ folderFunction(){
 							echo -e "\033[1mThe modification time is:\033[0m $modification_time"
 							
 							echo -e "\nPress any button to continue"
-							read -n 1
+							read -e -n 1
 							;;
 
 						7)
+							DirVar=0
 							;;
 						*)
-							echo "Invalid input";;
+							echo "Invalid input"
+							;;
 					esac
 				done
 				;;
@@ -585,15 +818,15 @@ folderFunction(){
 				folderName=""
 				confirmed=""
 				echo "************************************"
-				echo "\033[1mDelete a directory or folder\033[0m"
+				echo -e "\033[1mDelete a directory or folder\033[0m"
 				echo "************************************"
 				echo "Use this format /path/foldername"
-				read -e -p "Enter the path and name of the folder or directory you wish to delete: " folderName
+				read -e -p "Enter the path and name of the folder or directory you wish to delete (Enter just the folder name for current directory): " folderName
 				if [ -d "$folderName" ]; then
 						read -e -p "The folder/directory and everything in it will be deleted! Press y to continue or n to return: " confirmed
 						clear
 						echo "************************************"
-						echo "\033[1mDelete a directory or folder\033[0m"
+						echo -e "\033[1mDelete a directory or folder\033[0m"
 						echo "************************************"
 						if [ $confirmed = "y" ]; then
 							rm -r $folderName &> /dev/null
@@ -609,13 +842,12 @@ folderFunction(){
 				read -n 1
 				;;
 			5)
-				return
+				FolderVar=0
 				;;
 			*)
 				echo "Invalid input";;
 		esac
 	done
 }
-
 
 UI
