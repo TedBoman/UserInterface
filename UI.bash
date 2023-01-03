@@ -352,7 +352,7 @@ groupManager() {
 				echo "************************************"
 				echo -e "\033[1mCreate a group\033[0m"
 				echo "************************************"
-				read -e -p "\nEnter desired group name: " groupName
+				read -e -p "Enter desired group name: " groupName
 				groupadd $groupName
 				if [ $? -eq 0 ]; then
 					clear
@@ -382,7 +382,7 @@ groupManager() {
 				read -e -p "Enter which groups members you wish to display: " groupName
 				getent group $groupName
 				if [ $? -eq 0 ]; then
-				    if [ -z $groupName ]; then
+				    if [ -z "$groupName" ]; then
 					clear
 					echo -e "\nNo group name was entered!"
 					echo -e "\nPress any button to continue"
@@ -391,6 +391,9 @@ groupManager() {
 					grep $groupName /etc/passwd
 					if [ $? -eq 0 ]; then
 					    clear
+					    echo "************************************"
+					    echo -e "\033[1mList Users In Chosen Group\033[0m"
+					    echo "************************************"
 					    echo -e "\nGroup members of "$groupName": "
 					    echo -e -n ""$groupName""
 					    getent group $groupName | cut -d ':' -f4
@@ -399,6 +402,9 @@ groupManager() {
 
 					else
 					    clear
+					    echo "************************************"
+					    echo -e "\033[1mList Users In Chosen Group\033[0m"
+					    echo "************************************"
 					    echo -e "\nGroup members of "$groupName": "
 					    getent group $groupName | cut -d ':' -f4
 					    echo -e "\nPress any button to continue"
