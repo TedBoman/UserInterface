@@ -87,13 +87,17 @@ userMenu() {
 					echo -e "\033[1mFollow these steps to create a user\033[0m"
 					echo "************************************"
 					read -e -p "Enter username (MAX 32): " USERNAME
-					read -e -p "Enter your full name: " GECOS
-					id $USERNAME &> /dev/null
-					if [ $? = 0 ]; then
-						echo "This user already exists!"
+					if [ -n "$USERNAME" ]; then
+						read -e -p "Enter your full name: " GECOS
+						id $USERNAME &> /dev/null
+						if [ $? = 0 ]; then
+							echo "This user already exists!"
+						else
+							adduser --gecos "$GECOS" --force-badname $USERNAME
+							echo "The user $USERNAME has been added!"
+						fi
 					else
-						adduser --gecos "$GECOS" --force-badname $USERNAME
-						echo "The user $USERNAME has been added!"
+						echo "Please enter a username to create a user"
 					fi
 					echo -e "\nPress any button to continue"
 					read -e -n 1
@@ -104,12 +108,16 @@ userMenu() {
 					echo -e "\033[1mFollow these steps to delete a user\033[0m"
 					echo "************************************"
 					read -e -p "Enter the user: " USERNAME
-					id $USERNAME &> /dev/null
-					if [ $? = 1 ]; then
-						echo "This user does not exist!"
-					else					
-						userdel --remove $USERNAME &> /dev/null
-						echo "This user $USERNAME has been deleted!"
+					if [ -n "$USERNAME" ]; then
+						id $USERNAME &> /dev/null
+						if [ $? = 1 ]; then
+							echo "This user does not exist!"
+						else					
+							userdel --remove $USERNAME &> /dev/null
+							echo "This user $USERNAME has been deleted!"
+						fi
+					else
+						echo "Please enter a username to delete"
 					fi
 					echo -e "\nPress any button to continue"
 					read -e -n 1
@@ -128,24 +136,28 @@ userMenu() {
 					echo -e "\033[1mShow attributes fo a specific user\033[0m"
 					echo "************************************"
 					read -e -p "Enter username to view attributes: " USERNAME
-					id $USERNAME &> /dev/null
-					if [ $? = 1 ]; then
-						echo "This user does not exist!"
+					if [ -n "$USERNAME" ]; then
+						id $USERNAME &> /dev/null
+						if [ $? = 1 ]; then
+							echo "This user does not exist!"
+						else
+							echo "Attributes for user: $USERNAME"
+							echo -e "User:\t\t$USERNAME"
+							echo -e "User ID:\t\c"
+							id $USERNAME | awk '{print $1}' | sed 's/[^0-9]*//g'
+							echo -e "Group ID: \t\c"
+							id $USERNAME | awk '{print $2}' | sed 's/[^0-9]*//g'
+							echo -e "Comment:\t\c"
+							getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $5}'
+							echo -e "Directory:\t\c"
+							getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $6}'
+							echo -e "Shell\t\t\c"
+							getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $7}'
+							echo -e "Groups for user \c"
+							groups $USERNAME
+						fi
 					else
-						echo "Attributes for user: $USERNAME"
-						echo -e "User:\t\t$USERNAME"
-						echo -e "User ID:\t\c"
-						id $USERNAME | awk '{print $1}' | sed 's/[^0-9]*//g'
-						echo -e "Group ID: \t\c"
-						id $USERNAME | awk '{print $2}' | sed 's/[^0-9]*//g'
-						echo -e "Comment:\t\c"
-						getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $5}'
-						echo -e "Directory:\t\c"
-						getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $6}'
-						echo -e "Shell\t\t\c"
-						getent passwd $USERNAME | sed 's/,/ /g' | awk -F: '{print $7}'
-						echo -e "Groups for user \c"
-						groups $USERNAME
+						echo "Please enter a username to view attributes"
 					fi
 					echo -e "\nPress any button to continue"
 					read -e -n 1	
@@ -173,15 +185,19 @@ userMenu() {
 								USERNAME=""
 								echo "************************************"					
 								echo -e "\033[1mChange username\033[0m"
-								echo "************************************"								
+								echo "************************************"
 								read -e -p "Enter old username: " USERNAME
-								id $USERNAME &> /dev/null
-								if [ $? = 1 ]; then
-									echo "This user does not exist!"									
+								if [ -n "$USERNAME" ]; then
+									id $USERNAME &> /dev/null
+									if [ $? = 1 ]; then
+										echo "This user does not exist!"									
+									else
+										NEWUSERNAME=""
+										read -e -p "Enter new username: " NEWUSERNAME
+										usermod -l $NEWUSERNAME $USERNAME
+									fi
 								else
-									NEWUSERNAME=""
-									read -e -p "Enter new username: " NEWUSERNAME
-									usermod -l $NEWUSERNAME $USERNAME
+									echo "Please enter a username to change attribute"
 								fi
 								echo -e "\nPress any button to continue"
 								read -e -n 1
@@ -194,13 +210,17 @@ userMenu() {
 								echo "************************************"								
 
 								read -e -p "Enter user: " USERNAME
-								id $USERNAME &> /dev/null
-								if [ $? = 1 ]; then
-									echo "This user does not exist!"
-								else	
-									NEWUSERNAME=""
-									read -e -p "Enter new userID (MUST BE UNIQUE): " NEWID
-									usermod -u $NEWID $USERNAME
+								if [ -n "$USERNAME" ]; then
+									id $USERNAME &> /dev/null
+									if [ $? = 1 ]; then
+										echo "This user does not exist!"
+									else	
+										NEWUSERNAME=""
+										read -e -p "Enter new userID (MUST BE UNIQUE): " NEWID
+										usermod -u $NEWID $USERNAME
+									fi
+								else
+									echo "Please enter a username to change attribute"
 								fi
 								echo -e "\nPress any button to continue"
 								read -e -n 1
@@ -210,14 +230,18 @@ userMenu() {
 								NEWHOME=""
 								echo "************************************"					
 								echo -e "\033[1mChange home directory\033[0m"
-								echo "************************************"	
+								echo "************************************"
 								read -e -p "Enter user: " USERNAME
-								id $USERNAME &> /dev/null
-								if [ $? = 1 ]; then
-									echo "This user does not exist!"
+								if [ -n "$USERNAME" ]; then
+									id $USERNAME &> /dev/null
+									if [ $? = 1 ]; then
+										echo "This user does not exist!"
+									else
+										read -e -p "Enter the new home directory: " NEWHOME
+										usermod -d $NEWHOME $USERNAME
+									fi
 								else
-									read -e -p "Enter the new home directory: " NEWHOME
-									usermod -d $NEWHOME $USERNAME
+									echo "Please enter a username to change attribute"
 								fi
 								echo -e "\nPress any button to continue"
 								read -e -n 1
@@ -230,12 +254,16 @@ userMenu() {
 								echo "************************************"								
 
 								read -e -p "Enter username: " USERNAME
-								id $USERNAME &> /dev/null
-								if [ $? = 1 ]; then
-									echo "This user does not exist!"
+								if [ -n "$USERNAME" ]; then
+									id $USERNAME &> /dev/null
+									if [ $? = 1 ]; then
+										echo "This user does not exist!"
+									else
+										read -e -p "Enter new shell path: " NEWSHELL
+										usermod -s $NEWSHELL $USERNAME
+									fi
 								else
-									read -e -p "Enter new shell path: " NEWSHELL
-									usermod -s $NEWSHELL $USERNAME
+									echo "Please enter a username to change attribute"
 								fi
 								echo -e "\nPress any button to continue"
 								read -e -n 1
@@ -248,12 +276,16 @@ userMenu() {
 								echo "************************************"								
 
 								read -e -p "Enter username: " USERNAME
-								id $USERNAME &> /dev/null
-								if [ $? = 1 ]; then
-									echo "This user does not exist!"
+								if [ -n "$USERNAME" ]; then
+									id $USERNAME &> /dev/null
+									if [ $? = 1 ]; then
+										echo "This user does not exist!"
+									else
+										read -e -p "Enter new comment: " NEWCOMMENT
+										usermod -c "$NEWCOMMENT" $USERNAME
+									fi
 								else
-									read -e -p "Enter new comment: " NEWCOMMENT
-									usermod -c "$NEWCOMMENT" $USERNAME
+									echo "Please enter a username to change attribute"
 								fi
 								echo -e "\nPress any button to continue"
 								read -e -n 1
@@ -261,16 +293,20 @@ userMenu() {
 							6)
 								USERNAME=""
 								echo "************************************"					
-								echo "\033[1mChange user password\033[0m"
+								echo -e "\033[1mChange user password\033[0m"
 								echo "************************************"								
 								read -e -p "Enter username: " USERNAME
-								id $USERNAME &> /dev/null
-								if [ $? = 1 ]; then
-									echo "This user does not exist!"
+								if [ -n "$USERNAME" ]; then
+									id $USERNAME &> /dev/null
+									if [ $? = 1 ]; then
+										echo "This user does not exist!"
+									else
+										NEWPASSWORD=""
+										read -e -p "Enter new password: " NEWPASSWORD
+										usermod -p $NEWPASSWORD $USERNAME
+									fi
 								else
-									NEWPASSWORD=""
-									read -e -p "Enter new password: " NEWPASSWORD
-									usermod -p $NEWPASSWORD $USERNAME
+									echo "Please enter a username to change attribute"
 								fi
 								echo -e "\nPress any button to continue"
 								read -e -n 1
